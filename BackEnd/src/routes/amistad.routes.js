@@ -30,8 +30,8 @@ router.post('/aceptar', authMiddleware, aceptarSolicitud);
 // Rechazar solicitud
 router.post('/rechazar', authMiddleware, rechazarSolicitud);
 
-router.get('/siguiendo/:id', getSiguiendo);
-router.get('/seguidores/:id', getSeguidores);
+router.get('/siguiendo/:id', authMiddleware, getSiguiendo);
+router.get('/seguidores/:id', authMiddleware, getSeguidores);
 
 router.delete('/unfollow/:id', authMiddleware, unfollowUser);
 router.post('/follow/:id', authMiddleware, followBack);
