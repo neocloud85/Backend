@@ -18,10 +18,13 @@ export const getCatalog = async (req, res) => {
     const apiKey = process.env.GOOGLE_BOOKS_KEY;
 
     const page = parseInt(req.query.page || "0");
+    const categoriaQuery = req.query.cat;
+
     const maxResults = 20;
 
-    // Elegimos categoría según la página
-    const categoria = CATEGORIAS[page % CATEGORIAS.length];
+    // Si el usuario selecciona categoría → usarla
+    // Si no → categoría rotativa según la página
+    const categoria = categoriaQuery || CATEGORIAS[page % CATEGORIAS.length];
 
     const url = `https://www.googleapis.com/books/v1/volumes?q=subject:${encodeURIComponent(categoria)}&maxResults=${maxResults}&key=${apiKey}`;
 
