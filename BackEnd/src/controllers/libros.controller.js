@@ -1,16 +1,16 @@
 const CATEGORIAS = [
-  "Art",
   "Fiction",
-  "History",
+  "Fantasy",
+  "Romance",
+  "Mystery",
   "Science",
+  "History",
   "Biography",
   "Computers",
-  "Cooking",
   "Education",
   "Health",
   "Medical",
-  "Music",
-  "Nature"
+  "Business"
 ];
 
 export const getCatalog = async (req, res) => {
@@ -20,12 +20,10 @@ export const getCatalog = async (req, res) => {
     const page = parseInt(req.query.page || "0");
     const maxResults = 20;
 
-    // Elegimos una categoría según la página
+    // Elegimos categoría según la página
     const categoria = CATEGORIAS[page % CATEGORIAS.length];
 
-    const startIndex = page * maxResults;
-
-    const url = `https://www.googleapis.com/books/v1/volumes?q=subject:${encodeURIComponent(categoria)}&maxResults=${maxResults}&startIndex=${startIndex}&key=${apiKey}`;
+    const url = `https://www.googleapis.com/books/v1/volumes?q=subject:${encodeURIComponent(categoria)}&maxResults=${maxResults}&key=${apiKey}`;
 
     const response = await fetch(url);
     const data = await response.json();
