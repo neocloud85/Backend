@@ -1,3 +1,7 @@
+// ===============================
+//  CONTROLADOR DE CATÁLOGO
+// ===============================
+
 const CATEGORIAS = [
   "Fiction",
   "Fantasy",
@@ -11,7 +15,9 @@ const CATEGORIAS = [
 
 export const getCatalog = async (req, res) => {
   try {
-    // Rotación de keys (opcional, pero recomendado)
+    // ===============================
+    // 1. Rotación de API keys
+    // ===============================
     const apiKeys = [
       process.env.GOOGLE_BOOKS_KEY,
       process.env.GOOGLE_BOOKS_KEY_2
@@ -23,18 +29,29 @@ export const getCatalog = async (req, res) => {
 
     const apiKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
 
+    // ===============================
+    // 2. Parámetros
+    // ===============================
     const page = parseInt(req.query.page || "0", 10);
     const categoriaQuery = req.query.cat || null;
     const maxResults = 20;
 
-    // Si el frontend manda cat, usamos esa; si no, rotamos
+    // ===============================
+    // 3. Categoría seleccionada
+    // ===============================
     const categoria =
       categoriaQuery && CATEGORIAS.includes(categoriaQuery)
         ? categoriaQuery
         : CATEGORIAS[page % CATEGORIAS.length];
 
+    // ===============================
+    // 4. Paginación real
+    // ===============================
     const startIndex = page * maxResults;
 
+    // ===============================
+    // 5. URL principal
+    // ===============================
     const url = `https://www.googleapis.com/books/v1/volumes?q=subject:${encodeURIComponent(
       categoria
     )}&maxResults=${maxResults}&startIndex=${startIndex}&key=${apiKey}`;
@@ -44,6 +61,9 @@ export const getCatalog = async (req, res) => {
 
     const items = data.items || [];
 
+    // ===============================
+    // 6. Respuesta
+    // ===============================
     res.json({
       items,
       categoriaUsada: categoria,
