@@ -18,11 +18,15 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-    origin: CORS_ORIGIN || 'http://localhost:4200',
+    origin: [
+        'http://localhost:4200',
+        'https://frontend-one-cyan-4z5mhm9vnk.vercel.app'
+    ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 };
+
 
 app.use(cors(corsOptions));
 app.use(express.json());
