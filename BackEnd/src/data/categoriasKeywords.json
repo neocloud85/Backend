@@ -1,0 +1,107 @@
+{
+  "Art": [
+    "art", "artist", "painting", "drawing", "sculpture", "gallery", "museum", "illustration", "design"
+  ],
+  "Biography & Autobiography": [
+    "biography", "autobiography", "memoir", "life of", "personal story", "true story", "biographical"
+  ],
+  "Business & Economics": [
+    "business", "economy", "finance", "management", "entrepreneur", "startup", "marketing", "investment", "leadership"
+  ],
+  "Computers": [
+    "computer", "programming", "coding", "software", "hardware", "technology", "ai", "machine learning", "cybersecurity"
+  ],
+  "Cooking": [
+    "cooking", "recipe", "kitchen", "chef", "food", "baking", "culinary", "cookbook", "meal"
+  ],
+  "Drama": [
+    "drama", "theater", "play", "stage", "script", "dramatic", "performance"
+  ],
+  "Education": [
+    "education", "learning", "teaching", "school", "students", "classroom", "pedagogy"
+  ],
+  "Family & Relationships": [
+    "family", "relationships", "marriage", "parenting", "love", "couple", "children", "divorce"
+  ],
+  "Fiction": [
+    "novel", "fiction", "story", "narrative", "fantasy", "adventure", "romance", "thriller", "mystery"
+  ],
+  "Health & Fitness": [
+    "health", "fitness", "exercise", "wellness", "nutrition", "diet", "workout", "healthy"
+  ],
+  "History": [
+    "history", "historical", "ancient", "civilization", "war", "empire", "historian", "chronicle"
+  ],
+  "Humor": [
+    "humor", "funny", "jokes", "comedy", "satire", "laugh"
+  ],
+  "Juvenile Fiction": [
+    "children", "kids", "juvenile", "young reader", "middle grade", "childrens", "fantasy for kids"
+  ],
+  "Juvenile Nonfiction": [
+    "children", "kids", "educational for kids", "learning for kids", "juvenile nonfiction"
+  ],
+  "Law": [
+    "law", "legal", "justice", "court", "attorney", "crime", "legislation"
+  ],
+  "Mathematics": [
+    "math", "mathematics", "algebra", "geometry", "calculus", "statistics", "numbers"
+  ],
+  "Medical": [
+    "medical", "medicine", "doctor", "healthcare", "clinical", "disease", "treatment"
+  ],
+  "Music": [
+    "music", "musician", "song", "instrument", "composer", "band", "melody"
+  ],
+  "Nature": [
+    "nature", "wildlife", "environment", "ecology", "animals", "plants", "natural world"
+  ],
+  "Performing Arts": [
+    "performing arts", "dance", "theater", "performance", "stage", "acting"
+  ],
+  "Pets": [
+    "pet", "dog", "cat", "animal care", "veterinary", "pets", "puppy", "kitten"
+  ],
+  "Philosophy": [
+    "philosophy", "ethics", "logic", "existential", "metaphysics", "thinker"
+  ],
+  "Photography": [
+    "photography", "camera", "photo", "photographer", "portrait", "lens"
+  ],
+  "Poetry": [
+    "poetry", "poem", "verse", "lyric", "poet"
+  ],
+  "Political Science": [
+    "politics", "government", "political", "democracy", "election", "policy", "geopolitics"
+  ],
+  "Psychology": [
+    "psychology", "mind", "behavior", "mental", "cognitive", "therapy", "emotions"
+  ],
+  "Reference": [
+    "reference", "dictionary", "encyclopedia", "manual", "guide", "handbook"
+  ],
+  "Religion": [
+    "religion", "spiritual", "faith", "bible", "church", "god", "theology"
+  ],
+  "Science": [
+    "science", "scientific", "physics", "chemistry", "biology", "astronomy", "research"
+  ],
+  "Self-Help": [
+    "self-help", "motivation", "improvement", "habits", "mindset", "personal growth", "self development"
+  ],
+  "Social Science": [
+    "sociology", "anthropology", "culture", "society", "social science"
+  ],
+  "Sports & Recreation": [
+    "sport", "soccer", "basketball", "fitness", "training", "athlete", "exercise"
+  ],
+  "Technology & Engineering": [
+    "technology", "engineering", "tech", "robotics", "mechanical", "electrical", "innovation"
+  ],
+  "Transportation": [
+    "transportation", "cars", "trains", "planes", "vehicles", "travel by"
+  ],
+  "Travel": [
+    "travel", "tourism", "guidebook", "trip", "journey", "destination"
+  ]
+}
