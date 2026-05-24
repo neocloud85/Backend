@@ -50,7 +50,22 @@ export const getCatalog = async (req, res) => {
     const startIndex = page * maxResults;
 
     // ===============================
-    // 5. URL principal
+    // 5. Obtener totalItems SOLO en página 0
+    // ===============================
+    let totalItems = null;
+
+    if (page === 0) {
+      const countUrl = `https://www.googleapis.com/books/v1/volumes?q=subject:${encodeURIComponent(
+        categoria
+      )}&maxResults=1&key=${apiKey}`;
+
+      const countRes = await fetch(countUrl);
+      const countData = await countRes.json();
+      totalItems = countData.totalItems || 0;
+    }
+
+    // ===============================
+    // 6. Petición principal
     // ===============================
     const url = `https://www.googleapis.com/books/v1/volumes?q=subject:${encodeURIComponent(
       categoria
@@ -62,13 +77,14 @@ export const getCatalog = async (req, res) => {
     const items = data.items || [];
 
     // ===============================
-    // 6. Respuesta
+    // 7. Respuesta
     // ===============================
     res.json({
       items,
       categoriaUsada: categoria,
       page,
-      maxResults
+      maxResults,
+      totalItems
     });
 
   } catch (error) {
