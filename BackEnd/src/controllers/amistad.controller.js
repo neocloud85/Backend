@@ -142,14 +142,22 @@ export const getSiguiendo = async (req, res) => {
 
 export const getSeguidores = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params;      // tú
+    const yo = req.user.id;         // también tú (del token)
 
     const [rows] = await db.query(
-      `SELECT u.id, u.nombre, u.correo
+      `SELECT 
+         u.id, 
+         u.nombre, 
+         u.correo,
+         EXISTS(
+           SELECT 1 FROM seguidores 
+           WHERE seguidor_id = ? AND seguido_id = u.id
+         ) AS siguiendo
        FROM seguidores s
        JOIN usuarios u ON u.id = s.seguidor_id
        WHERE s.seguido_id = ?`,
-      [id]
+      [yo, id]
     );
 
     res.json(rows);
