@@ -201,4 +201,19 @@ export const followBack = async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT id, nombre, correo 
+       FROM usuarios
+       ORDER BY nombre ASC`
+    );
+
+    res.json(rows);
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 
