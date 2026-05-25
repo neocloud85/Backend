@@ -242,7 +242,14 @@ export const deleteChatAdmin = async (req, res) => {
 export const getChatMessagesAdmin = async (req, res) => {
   try {
     const { chatId } = req.params;
-    const [a, b] = chatId.split("-");
+    let [a, b] = chatId.split("-");
+
+    // Normalizar orden para que coincida con la tabla
+    if (a > b) {
+      const temp = a;
+      a = b;
+      b = temp;
+    }
 
     const [rows] = await db.query(`
       SELECT 
@@ -266,6 +273,7 @@ export const getChatMessagesAdmin = async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
 
 // ===============================
 // 📌 BORRAR MENSAJE INDIVIDUAL (ADMIN)
