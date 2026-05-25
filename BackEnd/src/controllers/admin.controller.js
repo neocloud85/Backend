@@ -242,14 +242,10 @@ export const deleteChatAdmin = async (req, res) => {
 export const getChatMessagesAdmin = async (req, res) => {
   try {
     const { chatId } = req.params;
-    let [a, b] = chatId.split("-");
 
-    // Normalizar orden para que coincida con la tabla
-    if (a > b) {
-      const temp = a;
-      a = b;
-      b = temp;
-    }
+    // Extraer los dos UUID completos
+    const a = chatId.substring(0, 36);
+    const b = chatId.substring(37, 73);
 
     const [rows] = await db.query(`
       SELECT 
@@ -273,6 +269,7 @@ export const getChatMessagesAdmin = async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
 
 
 // ===============================
