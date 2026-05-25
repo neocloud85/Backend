@@ -111,9 +111,11 @@ export const makeAdmin = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Error asignando rol admin" });
   }
-  
 };
 
+// ===============================
+// 📌 LISTAR RESEÑAS (ADMIN)
+// ===============================
 export const getAllReviewsAdmin = async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -134,7 +136,9 @@ export const getAllReviewsAdmin = async (req, res) => {
   }
 };
 
-
+// ===============================
+// 📌 BORRAR RESEÑA (ADMIN)
+// ===============================
 export const deleteReviewAdmin = async (req, res) => {
   try {
     const { id } = req.params;
@@ -187,7 +191,7 @@ export const getAllChatsAdmin = async (req, res) => {
       );
 
       const [[ultimo]] = await db.query(
-        "SELECT contenido, fecha FROM mensajes WHERE id = ?",
+        "SELECT contenido, fecha_envio FROM mensajes WHERE id = ?",
         [row.lastMessageId]
       );
 
@@ -196,7 +200,7 @@ export const getAllChatsAdmin = async (req, res) => {
         usuarioA: userA?.nombre || "Desconocido",
         usuarioB: userB?.nombre || "Desconocido",
         ultimo_mensaje: ultimo?.contenido || "",
-        fecha: ultimo?.fecha || null
+        fecha: ultimo?.fecha_envio || null
       });
     }
 
@@ -208,9 +212,6 @@ export const getAllChatsAdmin = async (req, res) => {
   }
 };
 
-
-
-
 // ===============================
 // 📌 BORRAR CHAT COMPLETO (ADMIN)
 // ===============================
@@ -218,7 +219,6 @@ export const deleteChatAdmin = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // id viene como "3-7"
     const [a, b] = id.split("-");
 
     await db.query(
@@ -235,6 +235,7 @@ export const deleteChatAdmin = async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
 // ===============================
 // 📌 LISTAR MENSAJES DE UN CHAT (ADMIN)
 // ===============================
@@ -249,13 +250,13 @@ export const getChatMessagesAdmin = async (req, res) => {
         m.remitente_id,
         m.destinatario_id,
         m.contenido,
-        m.fecha,
+        m.fecha_envio,
         u.nombre AS remitente_nombre
       FROM mensajes m
       JOIN usuarios u ON u.id = m.remitente_id
       WHERE (m.remitente_id = ? AND m.destinatario_id = ?)
          OR (m.remitente_id = ? AND m.destinatario_id = ?)
-      ORDER BY m.fecha ASC
+      ORDER BY m.fecha_envio ASC
     `, [a, b, b, a]);
 
     res.json(rows);
@@ -289,5 +290,3 @@ export const deleteMessageAdmin = async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
-
-
