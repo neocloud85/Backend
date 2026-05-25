@@ -1,11 +1,12 @@
 import db from '../config/database.js';
+import { v4 as uuid } from "uuid";
 
 /**
  * Crear una reseña
  * POST /api/resenas
  */
 export const addResena = async (req, res, next) => {
- try {
+  try {
     const usuario_id = req.user.id;
     const {
       libro_id,
@@ -38,14 +39,13 @@ export const addResena = async (req, res, next) => {
 
     let categorias = data.volumeInfo?.categories || [];
 
-    // 🔥 Separar etiquetas compuestas tipo "Fiction / Fantasy / Epic"
+    // Separar etiquetas compuestas tipo "Fiction / Fantasy / Epic"
     categorias = categorias.flatMap(cat =>
       cat.split("/").map(c => c.trim())
     );
 
     // 3. Insertar etiquetas y relaciones
     for (const nombre of categorias) {
-      // Insertar etiqueta si no existe
       const [etq] = await db.query(
         "SELECT id FROM etiqueta WHERE nombre = ?",
         [nombre]
@@ -63,26 +63,28 @@ export const addResena = async (req, res, next) => {
         etiqueta_id = etq[0].id;
       }
 
-      // Relacionar libro con etiqueta
       await db.query(
         "INSERT IGNORE INTO libro_etiqueta (libro_id, etiqueta_id) VALUES (?, ?)",
         [libro_id, etiqueta_id]
       );
     }
 
-    // 4. Insertar reseña
+    // 4. Insertar reseña con UUID
+    const id = uuid();
+
     await db.query(
-      "INSERT INTO resenas (usuario_id, libro_id, puntuacion, texto) VALUES (?, ?, ?, ?)",
-      [usuario_id, libro_id, puntuacion, texto]
+      "INSERT INTO resenas (id, usuario_id, libro_id, puntuacion, texto) VALUES (?, ?, ?, ?, ?)",
+      [id, usuario_id, libro_id, puntuacion, texto]
     );
 
-    res.json({ status: "ok" });
+    res.json({ status: "ok", id });
 
   } catch (error) {
     next(error);
   }
 };
-  export const getMyReviews = async (req, res, next) => {
+
+export const getMyReviews = async (req, res, next) => {
   try {
     const usuario_id = req.user.id;
 
@@ -100,8 +102,8 @@ export const addResena = async (req, res, next) => {
     next(error);
   }
 };
-  
-  export const hasReview = async (req, res, next) => {
+
+export const hasReview = async (req, res, next) => {
   try {
     const usuario_id = req.user.id;
     const libro_id = req.params.libro_id;
@@ -116,7 +118,6 @@ export const addResena = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
- 
 };
 
 export const getAllReviews = async (req, res, next) => {
@@ -128,19 +129,18 @@ export const getAllReviews = async (req, res, next) => {
        FROM resenas r
        JOIN libros l ON l.id = r.libro_id
        JOIN usuarios u ON u.id = r.usuario_id
-       WHERE r.usuario_id <> ?   -- excluir tus propias reseñas
-       ORDER BY r.id DESC`,
+       WHERE r.usuario_id <> ?
+       ORDER BY r.fecha DESC`,
       [usuario_id]
     );
-    console.log("BACKEND ROWS:", rows);
-    res.json(rows);
-    
 
+    res.json(rows);
 
   } catch (error) {
     next(error);
   }
 };
+
 export const getResenasSeguidos = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -164,6 +164,7 @@ export const getResenasSeguidos = async (req, res, next) => {
     next(err);
   }
 };
+
 export const getTopLibros = async (req, res, next) => {
   try {
     const [rows] = await db.query(
