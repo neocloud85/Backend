@@ -156,4 +156,135 @@ export const deleteReviewAdmin = async (req, res) => {
   }
 };
 
+// ===============================
+// 📌 LISTAR CHATS (ADMIN)
+// ===============================
+export const getAllChatsAdmin = async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        LEAST(remitente_id, destinatario_id) AS userA_id,
+        GREATEST(remitente_id, destinatario_id) AS userB_id,
+        MAX(id) AS lastMessageId
+      FROM mensajes
+      GROUP BY userA_id, userB_id
+      ORDER BY lastMessageId DESC
+    `);
+
+    // Obtener datos completos de cada chat
+    const chats = [];
+
+    for (const row of rows) {
+      const [[userA]] = await db.query(
+        "SELECT nombre FROM usuarios WHERE id = ?",
+        [row.userA_id]
+      );
+
+      const [[userB]] = await db.query(
+        "SELECT nombre FROM usuarios WHERE id = ?",
+        [row.userB_id]
+      );
+
+      const [[ultimo]] = await db.query(
+        "SELECT contenido, fecha FROM mensajes WHERE id = ?",
+        [row.lastMessageId]
+      );
+
+      chats.push({
+        id: `${row.userA_id}-${row.userB_id}`,
+        usuarioA: userA?.nombre || "Desconocido",
+        usuarioB: userB?.nombre || "Desconocido",
+        ultimo_mensaje: ultimo?.contenido || "",
+        fecha: ultimo?.fecha || null
+      });
+    }
+
+    res.json(chats);
+
+  } catch (error) {
+    console.error("Error en getAllChatsAdmin:", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+
+// ===============================
+// 📌 BORRAR CHAT COMPLETO (ADMIN)
+// ===============================
+export const deleteChatAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // id viene como "3-7"
+    const [a, b] = id.split("-");
+
+    await db.query(
+      `DELETE FROM mensajes 
+       WHERE (remitente_id = ? AND destinatario_id = ?)
+          OR (remitente_id = ? AND destinatario_id = ?)`,
+      [a, b, b, a]
+    );
+
+    res.json({ message: "Chat eliminado correctamente" });
+
+  } catch (error) {
+    console.error("Error en deleteChatAdmin:", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+// ===============================
+// 📌 LISTAR MENSAJES DE UN CHAT (ADMIN)
+// ===============================
+export const getChatMessagesAdmin = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const [a, b] = chatId.split("-");
+
+    const [rows] = await db.query(`
+      SELECT 
+        m.id,
+        m.remitente_id,
+        m.destinatario_id,
+        m.contenido,
+        m.fecha,
+        u.nombre AS remitente_nombre
+      FROM mensajes m
+      JOIN usuarios u ON u.id = m.remitente_id
+      WHERE (m.remitente_id = ? AND m.destinatario_id = ?)
+         OR (m.remitente_id = ? AND m.destinatario_id = ?)
+      ORDER BY m.fecha ASC
+    `, [a, b, b, a]);
+
+    res.json(rows);
+
+  } catch (error) {
+    console.error("Error en getChatMessagesAdmin:", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+// ===============================
+// 📌 BORRAR MENSAJE INDIVIDUAL (ADMIN)
+// ===============================
+export const deleteMessageAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [result] = await db.query(
+      "DELETE FROM mensajes WHERE id = ?",
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Mensaje no encontrado" });
+    }
+
+    res.json({ message: "Mensaje eliminado correctamente" });
+
+  } catch (error) {
+    console.error("Error en deleteMessageAdmin:", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
 
