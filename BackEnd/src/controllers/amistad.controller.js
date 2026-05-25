@@ -203,10 +203,32 @@ export const followBack = async (req, res) => {
 };
 export const getAllUsers = async (req, res, next) => {
   try {
+    const userId = req.user.id;
+
     const [rows] = await db.query(
-      `SELECT id, nombre, correo 
-       FROM usuarios
-       ORDER BY nombre ASC`
+      `
+      SELECT 
+        u.id,
+        u.nombre,
+        u.correo,
+
+        -- ¿Ya lo sigo?
+        EXISTS(
+          SELECT 1 FROM seguidores s 
+          WHERE s.seguidor_id = ? AND s.seguido_id = u.id
+        ) AS siguiendo,
+
+        -- ¿Ya le envié solicitud?
+        EXISTS(
+          SELECT 1 FROM solicitudes_amistad sa
+          WHERE sa.emisor_id = ? AND sa.receptor_id = u.id AND sa.estado = 'pendiente'
+        ) AS pendiente
+
+      FROM usuarios u
+      WHERE u.id != ?   -- No mostrarme a mí mismo
+      ORDER BY u.nombre ASC
+      `,
+      [userId, userId, userId]
     );
 
     res.json(rows);
@@ -215,5 +237,6 @@ export const getAllUsers = async (req, res, next) => {
     next(err);
   }
 };
+
 
 
