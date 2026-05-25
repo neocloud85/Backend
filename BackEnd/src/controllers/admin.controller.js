@@ -167,11 +167,12 @@ export const getAllChatsAdmin = async (req, res) => {
         GREATEST(remitente_id, destinatario_id) AS userB_id,
         MAX(id) AS lastMessageId
       FROM mensajes
-      GROUP BY userA_id, userB_id
+      GROUP BY 
+        LEAST(remitente_id, destinatario_id),
+        GREATEST(remitente_id, destinatario_id)
       ORDER BY lastMessageId DESC
     `);
 
-    // Obtener datos completos de cada chat
     const chats = [];
 
     for (const row of rows) {
@@ -206,6 +207,8 @@ export const getAllChatsAdmin = async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
+
 
 
 // ===============================
