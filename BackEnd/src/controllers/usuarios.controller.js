@@ -1,6 +1,6 @@
 import { pool } from '../config/database.js';
 import bcrypt from 'bcryptjs';
-
+import { v4 as uuid } from "uuid";
 
 // Obtener todos los usuarios
 export const getUsuarios = async (req, res) => {
@@ -33,21 +33,18 @@ export const getUsuarioById = async (req, res) => {
   }
 };
 
-
 // Crear usuario (registro)
 export const createUsuario = async (req, res) => {
   try {
     const { nombre, correo, contrasena } = req.body;
 
-    // Validación básica
     if (!nombre || !correo || !contrasena) {
       return res.status(400).json({ message: "Todos los campos son obligatorios" });
     }
-    console.log("BODY RECIBIDO:", req.body);
-    // Validar formato de email
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(correo)) {
-       return res.status(400).json({ message: "Formato de correo inválido" });
+      return res.status(400).json({ message: "Formato de correo inválido" });
     }
 
     // Comprobar si el correo ya existe
@@ -60,18 +57,21 @@ export const createUsuario = async (req, res) => {
       return res.status(400).json({ message: "El correo ya está registrado" });
     }
 
-    // Encriptar contraseña SIEMPRE
+    // Generar UUID
+    const id = uuid();
+
+    // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-    // Insertar usuario
-    const [result] = await pool.query(
-      "INSERT INTO usuarios (nombre, correo, contrasena) VALUES (?, ?, ?)",
-      [nombre, correo, hashedPassword]
+    // Insertar usuario con UUID
+    await pool.query(
+      "INSERT INTO usuarios (id, nombre, correo, contrasena) VALUES (?, ?, ?, ?)",
+      [id, nombre, correo, hashedPassword]
     );
 
     res.status(201).json({
       message: "Usuario creado correctamente",
-      id: result.insertId
+      id
     });
 
   } catch (error) {
