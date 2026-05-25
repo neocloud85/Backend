@@ -6,21 +6,44 @@ import db from '../config/database.js';
  */
 export const buscarUsuarios = async (req, res, next) => {
   try {
+    const userId = req.user.id;
     const { q } = req.query;
 
     const [rows] = await db.query(
-      `SELECT id, nombre, avatar 
-       FROM usuarios 
-       WHERE nombre LIKE ? 
-       LIMIT 20`,
-      [`%${q}%`]
+      `
+      SELECT 
+        u.id,
+        u.nombre,
+        u.avatar,
+
+        -- ¿Ya lo sigo?
+        EXISTS(
+          SELECT 1 FROM seguidores s 
+          WHERE s.seguidor_id = ? AND s.seguido_id = u.id
+        ) AS siguiendo,
+
+        -- ¿Ya le envié solicitud?
+        EXISTS(
+          SELECT 1 FROM solicitudes_amistad sa
+          WHERE sa.emisor_id = ? AND sa.receptor_id = u.id AND sa.estado = 'pendiente'
+        ) AS pendiente
+
+      FROM usuarios u
+      WHERE u.id != ? 
+      AND u.nombre LIKE ?
+      ORDER BY u.nombre ASC
+      LIMIT 20
+      `,
+      [userId, userId, userId, `%${q}%`]
     );
 
     res.json(rows);
+
   } catch (err) {
     next(err);
   }
 };
+
 
 /**
  * Enviar solicitud de amistad
