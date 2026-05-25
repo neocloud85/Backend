@@ -146,9 +146,15 @@ export const getResenasSeguidos = async (req, res, next) => {
     const userId = req.user.id;
 
     const [rows] = await db.query(
-      `SELECT r.id, r.texto, r.puntuacion, r.fecha,
-              l.titulo, l.autor,
-              u.nombre AS usuario
+      `SELECT 
+          r.id,
+          r.texto,
+          r.puntuacion,
+          r.fecha,
+          l.id AS libro_id,      -- 🔥 AÑADIDO
+          l.titulo,
+          l.autor,
+          u.nombre AS usuario
        FROM resenas r
        JOIN seguidores s ON s.seguido_id = r.usuario_id
        JOIN libros l ON l.id = r.libro_id
@@ -164,6 +170,7 @@ export const getResenasSeguidos = async (req, res, next) => {
     next(err);
   }
 };
+
 
 export const getTopLibros = async (req, res, next) => {
   try {
