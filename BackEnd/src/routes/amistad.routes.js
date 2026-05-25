@@ -10,7 +10,8 @@ import {
   getSiguiendo,
   getSeguidores,
   unfollowUser,
-  followBack
+  followBack,
+  getAllUsers
 } from '../controllers/amistad.controller.js';
 
 const router = express.Router();
@@ -35,6 +36,8 @@ router.get('/seguidores/:id', authMiddleware, getSeguidores);
 
 router.delete('/unfollow/:id', authMiddleware, unfollowUser);
 router.post('/follow/:id', authMiddleware, followBack);
+router.get('/usuarios', authMiddleware, getAllUsers);
+
 
 
 
