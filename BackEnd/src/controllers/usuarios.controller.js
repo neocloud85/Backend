@@ -85,6 +85,20 @@ export const deleteUsuario = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Comprobar si el usuario objetivo es admin
+    const [rows] = await pool.query(
+      "SELECT tipo FROM usuarios WHERE id = ?",
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    if (rows[0].tipo === 'admin') {
+      return res.status(403).json({ message: "No se puede eliminar a un administrador" });
+    }
+
     const [result] = await pool.query(
       "DELETE FROM usuarios WHERE id = ?",
       [id]
