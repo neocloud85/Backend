@@ -37,15 +37,31 @@ export const getAllUsers = async (req, res) => {
 export const searchUsers = async (req, res) => {
   try {
     const q = `%${req.query.q || ''}%`;
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const offset = (page - 1) * limit;
 
     const [rows] = await db.query(`
       SELECT id, nombre, correo, tipo, activo, fecha_creacion
       FROM usuarios
       WHERE nombre LIKE ? OR correo LIKE ?
       ORDER BY fecha_creacion DESC
+      LIMIT ? OFFSET ?
+    `, [q, q, limit, offset]);
+
+    const [[{ total }]] = await db.query(`
+      SELECT COUNT(*) AS total
+      FROM usuarios
+      WHERE nombre LIKE ? OR correo LIKE ?
     `, [q, q]);
 
-    res.json(rows);
+    res.json({
+      usuarios: rows,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    });
 
   } catch (error) {
     console.error(error);
@@ -60,10 +76,8 @@ export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Comprobar si el usuario objetivo es admin
     const [[target]] = await db.query(
-      `SELECT tipo FROM usuarios WHERE id = ?`,
-      [id]
+      `SELECT tipo FROM usuarios WHERE id = ?`, [id]
     );
 
     if (!target) {

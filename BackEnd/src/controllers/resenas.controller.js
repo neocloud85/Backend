@@ -87,16 +87,26 @@ export const addResena = async (req, res, next) => {
 export const getMyReviews = async (req, res, next) => {
   try {
     const usuario_id = req.user.id;
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const offset = (page - 1) * limit;
 
     const [rows] = await db.query(
       `SELECT r.*, l.titulo, l.autor
        FROM resenas r
        JOIN libros l ON l.id = r.libro_id
-       WHERE r.usuario_id = ?`,
+       WHERE r.usuario_id = ?
+       ORDER BY r.fecha DESC
+       LIMIT ? OFFSET ?`,
+      [usuario_id, limit, offset]
+    );
+
+    const [[{ total }]] = await db.query(
+      `SELECT COUNT(*) AS total FROM resenas WHERE usuario_id = ?`,
       [usuario_id]
     );
 
-    res.json(rows);
+    res.json({ resenas: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
 
   } catch (error) {
     next(error);
@@ -123,6 +133,9 @@ export const hasReview = async (req, res, next) => {
 export const getAllReviews = async (req, res, next) => {
   try {
     const usuario_id = req.user.id;
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const offset = (page - 1) * limit;
 
     const [rows] = await db.query(
       `SELECT r.*, l.titulo, l.autor, u.nombre AS usuario
@@ -130,11 +143,17 @@ export const getAllReviews = async (req, res, next) => {
        JOIN libros l ON l.id = r.libro_id
        JOIN usuarios u ON u.id = r.usuario_id
        WHERE r.usuario_id <> ?
-       ORDER BY r.fecha DESC`,
+       ORDER BY r.fecha DESC
+       LIMIT ? OFFSET ?`,
+      [usuario_id, limit, offset]
+    );
+
+    const [[{ total }]] = await db.query(
+      `SELECT COUNT(*) AS total FROM resenas WHERE usuario_id <> ?`,
       [usuario_id]
     );
 
-    res.json(rows);
+    res.json({ resenas: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
 
   } catch (error) {
     next(error);
@@ -144,6 +163,9 @@ export const getAllReviews = async (req, res, next) => {
 export const getResenasSeguidos = async (req, res, next) => {
   try {
     const userId = req.user.id;
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const offset = (page - 1) * limit;
 
     const [rows] = await db.query(
       `SELECT 
@@ -151,7 +173,7 @@ export const getResenasSeguidos = async (req, res, next) => {
           r.texto,
           r.puntuacion,
           r.fecha,
-          l.id AS libro_id,      -- 🔥 AÑADIDO
+          l.id AS libro_id,
           l.titulo,
           l.autor,
           u.nombre AS usuario
@@ -160,11 +182,20 @@ export const getResenasSeguidos = async (req, res, next) => {
        JOIN libros l ON l.id = r.libro_id
        JOIN usuarios u ON u.id = r.usuario_id
        WHERE s.seguidor_id = ?
-       ORDER BY r.fecha DESC`,
+       ORDER BY r.fecha DESC
+       LIMIT ? OFFSET ?`,
+      [userId, limit, offset]
+    );
+
+    const [[{ total }]] = await db.query(
+      `SELECT COUNT(*) AS total
+       FROM resenas r
+       JOIN seguidores s ON s.seguido_id = r.usuario_id
+       WHERE s.seguidor_id = ?`,
       [userId]
     );
 
-    res.json(rows);
+    res.json({ resenas: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
 
   } catch (err) {
     next(err);
