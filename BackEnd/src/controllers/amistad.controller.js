@@ -7,7 +7,10 @@ import db from '../config/database.js';
 export const buscarUsuarios = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { q } = req.query;
+    const q      = req.query.q || '';
+    const page   = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit  = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const offset = (page - 1) * limit;
 
     const [rows] = await db.query(
       `
@@ -16,13 +19,11 @@ export const buscarUsuarios = async (req, res, next) => {
         u.nombre,
         u.avatar,
 
-        -- ¿Ya lo sigo?
         EXISTS(
           SELECT 1 FROM seguidores s 
           WHERE s.seguidor_id = ? AND s.seguido_id = u.id
         ) AS siguiendo,
 
-        -- ¿Ya le envié solicitud?
         EXISTS(
           SELECT 1 FROM solicitudes_amistad sa
           WHERE sa.emisor_id = ? AND sa.receptor_id = u.id AND sa.estado = 'pendiente'
@@ -32,12 +33,18 @@ export const buscarUsuarios = async (req, res, next) => {
       WHERE u.id != ? 
       AND u.nombre LIKE ?
       ORDER BY u.nombre ASC
-      LIMIT 20
+      LIMIT ? OFFSET ?
       `,
-      [userId, userId, userId, `%${q}%`]
+      [userId, userId, userId, `%${q}%`, limit, offset]
     );
 
-    res.json(rows);
+    const [[{ total }]] = await db.query(
+      `SELECT COUNT(*) AS total FROM usuarios u
+       WHERE u.id != ? AND u.nombre LIKE ?`,
+      [userId, `%${q}%`]
+    );
+
+    res.json({ usuarios: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
 
   } catch (err) {
     next(err);
@@ -227,6 +234,9 @@ export const followBack = async (req, res) => {
 export const getAllUsers = async (req, res, next) => {
   try {
     const userId = req.user.id;
+    const page   = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit  = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const offset = (page - 1) * limit;
 
     const [rows] = await db.query(
       `
@@ -235,26 +245,30 @@ export const getAllUsers = async (req, res, next) => {
         u.nombre,
         u.correo,
 
-        -- ¿Ya lo sigo?
         EXISTS(
           SELECT 1 FROM seguidores s 
           WHERE s.seguidor_id = ? AND s.seguido_id = u.id
         ) AS siguiendo,
 
-        -- ¿Ya le envié solicitud?
         EXISTS(
           SELECT 1 FROM solicitudes_amistad sa
           WHERE sa.emisor_id = ? AND sa.receptor_id = u.id AND sa.estado = 'pendiente'
         ) AS pendiente
 
       FROM usuarios u
-      WHERE u.id != ?   -- No mostrarme a mí mismo
+      WHERE u.id != ?
       ORDER BY u.nombre ASC
+      LIMIT ? OFFSET ?
       `,
-      [userId, userId, userId]
+      [userId, userId, userId, limit, offset]
     );
 
-    res.json(rows);
+    const [[{ total }]] = await db.query(
+      `SELECT COUNT(*) AS total FROM usuarios WHERE id != ?`,
+      [userId]
+    );
+
+    res.json({ usuarios: rows, total, page, limit, totalPages: Math.ceil(total / limit) });
 
   } catch (err) {
     next(err);
